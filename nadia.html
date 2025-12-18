@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday Nadia</title>
+<style>
+  :root{
+    --bg:#fff5f7;
+    --card:#ffffff;
+    --accent:#ec4899;
+    --muted:#9ca3af;
+    --heart-color:#ec4899;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    background:
+      radial-gradient(at 10% 10%, rgba(236,72,153,0.08) 0 120px, transparent 121px),
+      radial-gradient(at 90% 80%, rgba(244,114,182,0.06) 0 160px, transparent 161px),
+      var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .container{
+    text-align:center;
+    width:400px;
+    max-width:90%;
+    padding:60px 40px;
+    box-shadow: 0 6px 30px rgba(2,6,23,0.08);
+    border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.96));
+    position:relative;
+    overflow:hidden;
+    border: 8px solid transparent;
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  h1{margin:0 0 8px;font-size:28px;color:var(--accent);}
+  p.lead{margin:0 0 24px;color:var(--muted);font-size:15px;}
+
+  .open-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:linear-gradient(180deg,var(--accent),#db2777);
+    color:white;
+    border:0;
+    padding:20px 50px;
+    border-radius:14px;
+    font-size:22px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(236,72,153,0.22);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .open-btn:active{transform:translateY(1px)}
+  .open-btn .icon{width:20px;height:20px;display:inline-block}
+
+  /* overlay message */
+  .overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: transparent;
+    z-index:40;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .overlay.show{opacity:1;pointer-events:all;}
+
+  .card{
+    width:760px;
+    max-width:94%;
+    background:var(--card);
+    padding:28px;
+    border-radius:16px;
+    box-shadow:0 14px 40px rgba(2,6,23,0.32);
+    text-align:left;
+    position:relative;
+    overflow:visible;
+  }
+  .card h2{margin:0 0 8px;font-size:32px;color:#081824;}
+  .card p{margin:0 0 12px;color:#263243;line-height:1.45;font-size:20px;}
+  .note{font-size:18px;color:#1f2937}
+  .close-btn{
+    margin-top:18px;
+    background:transparent;
+    border:1px solid #e6eef9;
+    color:var(--accent);
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+
+  /* small doctor badge */
+  .badge{
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    background:linear-gradient(90deg,#f0f9ff,#ffffff);
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid rgba(236,72,153,0.08);
+    box-shadow: 0 4px 18px rgba(236,72,153,0.06);
+    font-weight:600;
+    color:var(--accent);
+    font-size:13px;
+  }
+
+  footer.small{margin-top:18px;color:var(--muted);font-size:13px}
+
+  /* confetti canvas full-screen */
+  canvas#confetti {
+    position:fixed;
+    left:0;
+    top:0;
+    pointer-events:none;
+    z-index:60;
+  }
+
+  /* floating emojis */
+  .emoji-float {
+    position: absolute;
+    font-size: 32px;
+    animation: float 4s ease-in-out infinite;
+    opacity: 0.8;
+  }
+  .emoji-1 { top: 20px; left: 20px; animation-delay: 0s; }
+  .emoji-2 { top: 20px; right: 20px; animation-delay: 1s; }
+  .emoji-3 { bottom: 20px; left: 20px; animation-delay: 2s; }
+  .emoji-4 { bottom: 20px; right: 20px; animation-delay: 1.5s; }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+  }
+
+  /* breathing border animation */
+  @keyframes breathe {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(236,72,153,0.4), 0 0 40px rgba(236,72,153,0.2), 0 6px 30px rgba(2,6,23,0.08);
+      border-color: rgba(236,72,153,0.6);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(251,146,60,0.5), 0 0 60px rgba(251,146,60,0.3), 0 6px 30px rgba(2,6,23,0.08);
+      border-color: rgba(251,146,60,0.7);
+    }
+  }
+
+  /* floating hearts */
+  .heart {
+    position:absolute;
+    bottom:12px;
+    left:50%;
+    transform:translateX(-50%) scale(1);
+    font-size:28px;
+    line-height:1;
+    will-change:transform,opacity;
+    filter:drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+    color:var(--heart-color);
+    opacity:0;
+  }
+
+  /* floating animation (vertical movement + fade + drift + rotate) */
+  @keyframes floatUp {
+    0%   { transform: translate3d(var(--sx,0px), 0, 0) scale(var(--s,1)) rotate(0deg); opacity:0; }
+    6%   { opacity:1; }
+    25%  { transform: translate3d(calc(var(--sx,0px) + var(--drift,0px)), -20vh, 0) rotate(var(--rot1,10deg)) scale(var(--s,1)); opacity:1; }
+    50%  { transform: translate3d(calc(var(--sx,0px) - var(--drift2,0px)), -45vh, 0) rotate(var(--rot2, -10deg)) scale(calc(var(--s,1) * 1.05)); opacity:1; }
+    80%  { opacity:1; }
+    100% { transform: translate3d(calc(var(--sx,0px) + var(--drift3,0px)), -110vh, 0) rotate(var(--rot3, 25deg)) scale(var(--s,1)); opacity:0; }
+  }
+
+  /* Pixelated flowers decoration */
+  .flower-border {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .flower {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  /* Heart container sits over the full viewport so hearts can float */
+  .hearts {
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    overflow:visible;
+    z-index:50;
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main" aria-labelledby="title">
+    <div class="emoji-float emoji-1">🩺</div>
+    <div class="emoji-float emoji-2">🍾</div>
+    <div class="emoji-float emoji-3">💊</div>
+    <div class="emoji-float emoji-4">🍷</div>
+    <div style="margin-top:26px">
+      <div style="display:flex;justify-content:center;">
+        <button id="openBtn" class="open-btn" aria-haspopup="dialog" aria-controls="greeting">
+          Open
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- overlay message + confetti -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="greetingTitle" tabindex="-1">
+    <div class="card" id="greeting" >
+      <h2 id="greetingTitle">Happy Birthday, Nadia! 🎉🎂🎈🎊</h2>
+      <p class="note">
+        🩺👩‍⚕️ Hello first girlfriend.  I'm very glad to have known you for so long.  I love how things are working out for you. Wishing you a year of bright moments and satisfying breakthroughs. 🌟💕
+      </p>
+
+      <p style="margin-top:8px;font-weight:600;color:#ec4899">— With appreciation and friendship, John 💖</p>
+
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button id="heartBtn" class="close-btn" style="padding:15px 20px; font-size:16px; font-weight:600;">Spam Click for Hearts 💖</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <div class="hearts" id="heartsRoot" aria-hidden="true"></div>
+  <div class="flower-border" id="flowerBorder" aria-hidden="true"></div>
+
+<script>
+/* Simple canvas confetti effect - self-contained, no external libs */
+(function(){
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  let W = window.innerWidth;
+  let H = window.innerHeight;
+  canvas.width = W; canvas.height = H;
+
+  const random = (min,max) => Math.random()*(max-min)+min;
+
+  class Confetto {
+    constructor(){
+      this.reset();
+    }
+    reset(){
+      this.x = random(0, W);
+      this.y = random(-H*0.2, -10);
+      this.w = random(6, 12);
+      this.h = random(8, 16);
+      this.color = ConfettiPalette[Math.floor(random(0, ConfettiPalette.length))];
+      this.rotation = random(0, Math.PI*2);
+      this.speedY = random(1.6, 5.6);
+      this.speedX = random(-1.8,1.8);
+      this.tilt = random(-0.3,0.3);
+      this.spin = random(-0.12,0.12);
+      this.life = random(220, 420);
+      this.age = 0;
+    }
+    update(){
+      this.age++;
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.rotation += this.spin;
+      this.tilt += 0.01;
+      if(this.y > H + 30 || this.x < -50 || this.x > W + 50 || this.age > this.life) this.reset();
+    }
+    draw(ctx){
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.transform(1, this.tilt, -this.tilt, 1, 0, 0);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+      ctx.restore();
+    }
+  }
+
+  const ConfettiPalette = [
+    '#ec4899', '#f472b6', '#fbbf24', '#fb923c', '#c084fc', '#f43f5e', '#fb7185'
+  ];
+
+  let confetti = [];
+  const MAX = 220;
+  for(let i=0;i<40;i++) confetti.push(new Confetto());
+
+  let running = false;
+  let rafId = null;
+
+  function resize(){
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
+  }
+  window.addEventListener('resize', resize);
+
+  function step(){
+    ctx.clearRect(0,0,W,H);
+    confetti.forEach(c=>{ c.update(); c.draw(ctx); });
+    if(running) rafId = requestAnimationFrame(step);
+  }
+
+  function burst(intensity=80){
+    // add new confetti up to MAX
+    const add = Math.min(intensity, MAX - confetti.length);
+    for(let i=0;i<add;i++) confetti.push(new Confetto());
+    running = true;
+    if(!rafId) step();
+    // auto stop after 6s, but keep some particles for 2s on screen
+    clearTimeout(window._confettiStop);
+    window._confettiStop = setTimeout(()=>{ stopSmooth(600); }, 6000);
+  }
+
+  function stopSmooth(ms=500){
+    // gradually reduce particles
+    const start = Date.now();
+    const s = setInterval(()=>{
+      const t = (Date.now()-start)/ms;
+      if(t>=1){ clearInterval(s); running=false; cancelAnimationFrame(rafId); rafId=null; confetti = []; ctx.clearRect(0,0,W,H); return; }
+      // remove a bunch progressively
+      const removeCount = Math.ceil(t * confetti.length * 0.12);
+      confetti.splice(0, removeCount);
+    }, 120);
+  }
+
+  /* Hook up to UI */
+  const openBtn = document.getElementById('openBtn');
+  const overlay = document.getElementById('overlay');
+  const heartBtn = document.getElementById('heartBtn');
+  const root = document.getElementById('heartsRoot');
+
+  // Utility to get viewport width safely
+  function vw() { return Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0); }
+  function vh() { return Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0); }
+
+  // Create a single heart element and animate it
+  function createSingleHeart(xPercent) {
+    const el = document.createElement('div');
+    el.className = 'heart';
+    // Using an SVG heart for better rendering/scaling
+    el.innerHTML = `
+      <svg viewBox="0 0 32 29.6" width="1em" height="1em" aria-hidden="true" focusable="false">
+        <path d="M23.6,0c-2.9,0-5.4,1.6-6.6,4C15.8,1.6,13.3,0,10.4,0C4.7,0,0,4.7,0,10.4c0,6.6,9.4,12.2,16,19.2
+          c6.6-6.9,16-12.6,16-19.2C32,4.7,27.3,0,23.6,0z" fill="currentColor"></path>
+      </svg>
+    `;
+
+    // Randomize parameters
+    const size = (Math.random() * 0.9) + 0.9; // 0.9 - 1.8 em
+    const leftPerc = (typeof xPercent === 'number') ? xPercent : (Math.random() * 100);
+    const drift = (Math.random() - 0.5) * (vw() * 0.18); // px
+    const drift2 = (Math.random() - 0.5) * (vw() * 0.28);
+    const drift3 = (Math.random() - 0.5) * (vw() * 0.36);
+    const rot1 = (Math.random() - 0.5) * 30; // deg
+    const rot2 = (Math.random() - 0.5) * 50;
+    const rot3 = (Math.random() - 0.5) * 80;
+    const duration = 2200 + Math.random() * 1600; // 2.2s - 3.8s
+    const delay = Math.random() * 150; // small stagger
+
+    // Position using percentage so it works on resize
+    el.style.left = leftPerc + '%';
+    el.style.fontSize = (size * 26) + 'px';
+    // pass random values into CSS custom props
+    el.style.setProperty('--s', size);
+    el.style.setProperty('--sx', '0px'); // small x offset applied via keyframes calc
+    el.style.setProperty('--drift', drift + 'px');
+    el.style.setProperty('--drift2', drift2 + 'px');
+    el.style.setProperty('--drift3', drift3 + 'px');
+    el.style.setProperty('--rot1', rot1 + 'deg');
+    el.style.setProperty('--rot2', rot2 + 'deg');
+    el.style.setProperty('--rot3', rot3 + 'deg');
+
+    // Apply animation
+    el.style.animation = `floatUp ${duration}ms cubic-bezier(.15,.85,.35,1) ${delay}ms forwards`;
+
+    // Insert and remove after animation completes
+    root.appendChild(el);
+    // Clean up when animation ends
+    const cleanup = () => {
+      el.removeEventListener('animationend', cleanup);
+      if (el.parentNode) el.parentNode.removeChild(el);
+    };
+    el.addEventListener('animationend', cleanup);
+
+    // Safety: remove after max time (duration + small buffer) in case animationend doesn't fire
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, duration + delay + 500);
+  }
+
+  function createHeart() {
+    for (let i = 0; i < 3; i++) {
+      const xPercent = Math.random() * 100;
+      createSingleHeart(xPercent);
+    }
+  }
+
+  function showOverlay(){
+    overlay.classList.add('show');
+    // position focus for accessibility
+    setTimeout(()=>{ overlay.focus(); }, 250);
+    // start confetti burst
+    burst(100);
+  }
+
+  function hideOverlay(){
+    overlay.classList.remove('show');
+    stopSmooth(400);
+  }
+
+  openBtn.addEventListener('click', showOverlay);
+  heartBtn.addEventListener('click', createHeart);
+
+  // close overlay when user presses ESC
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && overlay.classList.contains('show')) hideOverlay();
+  });
+
+  // allow click outside card to close
+  overlay.addEventListener('click', (e)=>{
+    if(e.target === overlay) hideOverlay();
+  });
+
+  // small initial accessibility hint: allow Enter to trigger button
+  openBtn.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openBtn.click(); }
+  });
+
+  // keep canvas sized correctly on load
+  resize();
+
+  // Create pixelated flowers around the border
+  function createFlowerBorder() {
+    const container = document.getElementById('flowerBorder');
+    const spacing = 80; // pixels between flowers
+    const w = vw();
+    const h = vh();
+    
+    // Pixel art flowers using data URIs
+    const flowers = [
+      // Pink flower
+      'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="6" y="2" width="4" height="4" fill="#ffb3d9"/><rect x="2" y="6" width="4" height="4" fill="#ffb3d9"/><rect x="10" y="6" width="4" height="4" fill="#ffb3d9"/><rect x="6" y="10" width="4" height="4" fill="#ffb3d9"/><rect x="6" y="6" width="4" height="4" fill="#ffe066"/></svg>'),
+      // Purple flower
+      'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="5" y="1" width="6" height="3" fill="#d896ff"/><rect x="1" y="5" width="3" height="6" fill="#d896ff"/><rect x="12" y="5" width="3" height="6" fill="#d896ff"/><rect x="5" y="12" width="6" height="3" fill="#d896ff"/><rect x="5" y="5" width="6" height="6" fill="#fff59d"/></svg>'),
+      // Light pink flower
+      'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="7" y="3" width="2" height="2" fill="#ffc4dd"/><rect x="3" y="7" width="2" height="2" fill="#ffc4dd"/><rect x="11" y="7" width="2" height="2" fill="#ffc4dd"/><rect x="7" y="11" width="2" height="2" fill="#ffc4dd"/><rect x="5" y="5" width="6" height="6" fill="#ffc4dd"/><rect x="6" y="6" width="4" height="4" fill="#ffeb99"/></svg>')
+    ];
+    
+    // Top edge (add jitter for variation per refresh)
+    for (let x = 20; x < w - 20; x += spacing) {
+      const flower = document.createElement('div');
+      const jitterX = (Math.random() - 0.5) * 40; // ±20px
+      const jitterY = (Math.random() - 0.5) * 12; // subtle vertical variance
+      flower.className = 'flower';
+      flower.style.left = (x + jitterX) + 'px';
+      flower.style.top = (10 + jitterY) + 'px';
+      flower.style.backgroundImage = 'url("' + flowers[Math.floor(Math.random() * flowers.length)] + '")';
+      container.appendChild(flower);
+    }
+    
+    // Bottom edge
+    for (let x = 20; x < w - 20; x += spacing) {
+      const flower = document.createElement('div');
+      const jitterX = (Math.random() - 0.5) * 40;
+      const jitterY = (Math.random() - 0.5) * 12;
+      flower.className = 'flower';
+      flower.style.left = (x + jitterX) + 'px';
+      flower.style.bottom = (10 + jitterY) + 'px';
+      flower.style.backgroundImage = 'url("' + flowers[Math.floor(Math.random() * flowers.length)] + '")';
+      container.appendChild(flower);
+    }
+    
+    // Left edge
+    for (let y = 60; y < h - 60; y += spacing) {
+      const flower = document.createElement('div');
+      const jitterY = (Math.random() - 0.5) * 40; // ±20px
+      const jitterX = (Math.random() - 0.5) * 12; // subtle horizontal variance
+      flower.className = 'flower';
+      flower.style.left = (10 + jitterX) + 'px';
+      flower.style.top = (y + jitterY) + 'px';
+      flower.style.backgroundImage = 'url("' + flowers[Math.floor(Math.random() * flowers.length)] + '")';
+      container.appendChild(flower);
+    }
+    
+    // Right edge
+    for (let y = 60; y < h - 60; y += spacing) {
+      const flower = document.createElement('div');
+      const jitterY = (Math.random() - 0.5) * 40;
+      const jitterX = (Math.random() - 0.5) * 12;
+      flower.className = 'flower';
+      flower.style.right = (10 + jitterX) + 'px';
+      flower.style.top = (y + jitterY) + 'px';
+      flower.style.backgroundImage = 'url("' + flowers[Math.floor(Math.random() * flowers.length)] + '")';
+      container.appendChild(flower);
+    }
+  }
+
+  // Initialize flowers on load
+  createFlowerBorder();
+  
+  // Recreate flowers on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      document.getElementById('flowerBorder').innerHTML = '';
+      createFlowerBorder();
+    }, 250);
+  });
+})();
+</script>
+</body>
+</html>
